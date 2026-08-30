@@ -203,7 +203,8 @@ class WeatherService:
     # WEATHER FORECAST
     # =====================================================
 
-    async def get_forecast(
+   ```python
+async def get_forecast(
         self,
         lat: float,
         lon: float,
@@ -211,12 +212,9 @@ class WeatherService:
     ) -> Dict[str, Any]:
 
         params = {
-
             "latitude": lat,
-
             "longitude": lon,
 
-            # Daily forecast
             "daily": [
                 "temperature_2m_max",
                 "temperature_2m_min",
@@ -225,27 +223,20 @@ class WeatherService:
                 "wind_speed_10m_max"
             ],
 
-            # Hourly forecast
             "hourly": [
                 "temperature_2m",
                 "relative_humidity_2m",
                 "apparent_temperature"
             ],
 
-            "forecast_days":
-                min(
-                    max(days, 1),
-                    14
-                ),
-
-            "timezone":
-                "auto"
+            "forecast_days": min(max(days, 1), 14),
+            "timezone": "auto"
         }
 
         try:
 
-            async with httpx.AsyncClient(timeout=10.0) as client:
-              
+            async with httpx.AsyncClient(timeout=15.0) as client:
+
                 response = await client.get(
                     self.base_url,
                     params=params
@@ -255,56 +246,30 @@ class WeatherService:
 
                 data = response.json()
 
-            daily_data = data.get(
-                "daily",
-                {}
-            )
+            daily_data = data.get("daily", {})
+            hourly_data = data.get("hourly", {})
 
-            hourly_data = data.get(
-                "hourly",
-                {}
-            )
+            if not hourly_data:
+                raise Exception("No hourly forecast data available")
 
-            # IMPORTANT:
-            # We now return BOTH daily and hourly data.
             return {
-
                 "latitude": lat,
-
                 "longitude": lon,
-
-                "timezone":
-                    data.get(
-                        "timezone",
-                        "UTC"
-                    ),
-
-                "daily":
-                    daily_data,
-
-                "hourly":
-                    hourly_data,
-
-                "status":
-                    "success"
+                "timezone": data.get("timezone", "UTC"),
+                "daily": daily_data,
+                "hourly": hourly_data,
+                "status": "success"
             }
+
         except Exception as e:
-            
+
             return {
-
                 "latitude": lat,
-
                 "longitude": lon,
-
                 "timezone": "UTC",
-
-                "status":
-                    "error_fetching_forecast",
-
-                "error":
-                    str(e),
-
+                "status": "error_fetching_forecast",
+                "error": str(e),
                 "daily": {},
-
                 "hourly": {}
             }
+```
