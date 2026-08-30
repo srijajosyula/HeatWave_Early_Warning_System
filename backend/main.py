@@ -9,7 +9,7 @@ except ImportError:
     pass
 
 # Import route handlers
-from .routes import weather_router, risk_router, alerts_router
+from routes import weather_router, risk_router, alerts_router
 
 # Initialize FastAPI application
 app = FastAPI(
