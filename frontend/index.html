@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HeatWave Early Warning System</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header>
+
+        <div>
+
+            <h1>🌡️ HeatWave Early Warning System</h1>
+
+            <p>
+                Heat stress monitoring, health-risk prediction and early alerts
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main>
+
+
+        <!-- ================= LOCATION SEARCH ================= -->
+
+        <section class="location-search-card">
+
+            <h2>📍 Select Location</h2>
+
+            <p class="search-description">
+                Search for a city or location to view its current heatwave risk.
+            </p>
+
+            <div class="location-search">
+
+                <input
+                    type="text"
+                    id="locationInput"
+                    placeholder="Enter city or location..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    id="searchLocationButton"
+                    onclick="searchLocation()">
+                    🔍 Search
+                </button>
+
+            </div>
+
+            <p
+                id="locationStatus"
+                class="location-status">
+            </p>
+
+        </section>
+
+
+
+        <!-- ================= SYSTEM STATUS ================= -->
+
+        <section class="status-card">
+
+            <div>
+
+                <h2>System Status</h2>
+
+                <p id="systemStatus">
+                    Checking backend...
+                </p>
+
+            </div>
+
+
+            <div class="dashboard-info">
+
+                <span id="currentLocation">
+                    📍 Demo Metropolitan Area
+                </span>
+
+                <span>
+                    🕐 Last Updated:
+                    <strong id="lastUpdated">--</strong>
+                </span>
+
+                <button
+                    type="button"
+                    onclick="initializeDashboard()"
+                    class="refresh-button">
+                    🔄 Refresh Data
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= DASHBOARD ================= -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- ================= CURRENT WEATHER ================= -->
+
+            <div class="card weather-card">
+
+                <h2>🌤️ Current Weather</h2>
+
+                <p>
+                    Temperature:
+                    <strong id="temperature">--</strong> °C
+                </p>
+
+                <p>
+                    Humidity:
+                    <strong id="humidity">--</strong> %
+                </p>
+
+                <p>
+                    Heat Index:
+                    <strong id="heatIndex">--</strong> °C
+                </p>
+
+                <p>
+                    Wet-Bulb Temperature:
+                    <strong id="wetBulb">--</strong> °C
+                </p>
+
+                <p>
+                    WBGT:
+                    <strong id="wbgt">--</strong> °C
+                </p>
+
+            </div>
+
+
+
+            <!-- ================= HEAT RISK ================= -->
+
+            <div class="card heat-risk">
+
+                <h2>⚠️ Heat Risk</h2>
+
+
+                <div class="risk-score-display">
+
+                    <strong id="riskScore">--</strong>
+
+                    <span>/ 100</span>
+
+                </div>
+
+
+                <div class="risk-meter">
+
+                    <div id="riskMeterFill"></div>
+
+                </div>
+
+
+                <div class="risk-scale">
+
+                    <span>Low</span>
+
+                    <span>Moderate</span>
+
+                    <span>High</span>
+
+                    <span>Extreme</span>
+
+                </div>
+
+
+                <p>
+
+                    Risk Level:
+                    <strong id="riskLevel">--</strong>
+
+                </p>
+
+
+                <p>
+
+                    Category:
+                    <strong id="riskCategory">--</strong>
+
+                </p>
+
+            </div>
+
+
+
+            <!-- ================= ACTIVE ALERTS ================= -->
+
+            <div class="card">
+
+                <h2>🚨 Active Alerts</h2>
+
+                <div id="alerts">
+
+                    Loading alerts...
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= ML PREDICTION ================= -->
+
+            <div class="card">
+
+                <h2>🤖 ML Health-Risk Prediction</h2>
+
+
+               
+
+
+                <hr>
+
+
+                <p>
+
+                    ML Risk Score:
+                    <strong id="mlRiskScore">--</strong>
+
+                </p>
+
+
+                <p>
+
+                    ML Risk Level:
+                    <strong id="mlRiskLevel">--</strong>
+
+                </p>
+
+
+                <div class="ml-risk-meter">
+
+                    <div id="mlRiskMeterFill"></div>
+
+                </div>
+
+
+                <div class="ml-risk-scale">
+
+                    <span>Low</span>
+
+                    <span>Moderate</span>
+
+                    <span>High</span>
+
+                    <span>Extreme</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= TEMPERATURE FORECAST ================= -->
+
+        <section class="card forecast-card">
+
+            <h2>🌡️ 24-Hour Temperature Forecast</h2>
+
+            <div class="forecast-chart-container">
+
+                <canvas id="temperatureChart"></canvas>
+
+            </div>
+
+            <p
+                id="forecastStatus"
+                class="forecast-status">
+                Loading forecast...
+            </p>
+
+        </section>
+
+
+
+        <!-- ================= SAFETY RECOMMENDATIONS ================= -->
+
+        <section class="card recommendations">
+
+            <h2>💡 Safety Recommendations</h2>
+
+            <ul id="recommendations">
+
+                <li>
+                    Waiting for weather data...
+                </li>
+
+            </ul>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <p>
+            HeatWave Early Warning System — SIH Prototype
+        </p>
+
+        <p>
+            Real-time thermal stress monitoring • ML-based health-risk prediction
+        </p>
+
+    </footer>
+
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script src="app.js?v=4"></script>
+
+</body>
+
+</html>
