@@ -245,7 +245,10 @@ class WeatherService:
         try:
 
             async with httpx.AsyncClient(
-                timeout=10.0
+                timeout=10.0,
+                headers={
+                    "User-Agent": "HeatWave-Early-Warning-System/1.0"
+                }
             ) as client:
 
                 response = await client.get(
