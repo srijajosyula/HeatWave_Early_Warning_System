@@ -293,21 +293,36 @@ class WeatherService:
 
         except Exception as e:
 
-            return {
+    return {
 
-                "latitude": lat,
+        "latitude": lat,
 
-                "longitude": lon,
+        "longitude": lon,
 
-                "timezone": "UTC",
+        "timezone": "UTC",
 
-                "status":
-                    "error_fetching_forecast",
+        "status":
+            "fallback_offline_forecast",
 
-                "error":
-                    str(e),
+        "error":
+            str(e),
 
-                "daily": {},
+        "daily": {
+            "time": [],
+            "temperature_2m_max": [],
+            "temperature_2m_min": [],
+            "apparent_temperature_max": [],
+            "precipitation_sum": [],
+            "wind_speed_10m_max": []
+        },
+
+        "hourly": {
+            "time": [],
+            "temperature_2m": [],
+            "relative_humidity_2m": [],
+            "apparent_temperature": []
+        }
+    }
 
                 "hourly": {}
             }
