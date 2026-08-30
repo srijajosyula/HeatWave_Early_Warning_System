@@ -13,7 +13,8 @@ async function checkBackend() {
 
     try {
 
-        const API_BASE = "https://heatwave-early-warning-system.onrender.com";
+        const response = await fetch(
+            `${API_BASE}/health`
         );
 
         if (!response.ok) {
