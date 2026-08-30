@@ -253,7 +253,10 @@ class WeatherService:
 
                 response = await client.get(
                     self.base_url,
-                    params=params
+                    params=params,
+                    headers={
+                        "User-Agent": "Mozilla/5.0"
+                    }
                 )
 
                 response.raise_for_status()
