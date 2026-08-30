@@ -203,7 +203,6 @@ class WeatherService:
     # WEATHER FORECAST
     # =====================================================
 
-   ```python
 async def get_forecast(
         self,
         lat: float,
@@ -272,4 +271,4 @@ async def get_forecast(
                 "daily": {},
                 "hourly": {}
             }
-```
+
