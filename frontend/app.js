@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://heatwave-early-warning-system.onrender.com";;
 
 let LATITUDE = 16.5062;
 let LONGITUDE = 80.6480;
@@ -13,8 +13,7 @@ async function checkBackend() {
 
     try {
 
-        const response = await fetch(
-            `${API_BASE}/health`
+        const API_BASE = "https://heatwave-early-warning-system.onrender.com";
         );
 
         if (!response.ok) {
