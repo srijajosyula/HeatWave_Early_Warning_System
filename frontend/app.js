@@ -56,6 +56,10 @@ async function checkModel() {
 
         const modelStatus =
             document.getElementById("modelStatus");
+       if (!modelStatus) {
+          console.warn("modelStatus element not found");
+          return;
+       }
 
         if (data.model_ready === true) {
 
