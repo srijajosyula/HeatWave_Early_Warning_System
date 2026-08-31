@@ -42,7 +42,7 @@ class WeatherService:
             "latitude": lat,
             "longitude": lon,
 
-            "current": [
+            "current": ",".join( [
                 "temperature_2m",
                 "relative_humidity_2m",
                 "apparent_temperature",
@@ -50,7 +50,7 @@ class WeatherService:
                 "surface_pressure",
                 "precipitation",
                 "weather_code"
-            ],
+            ]),
 
             "timezone": "auto"
         }
@@ -253,19 +253,19 @@ class WeatherService:
 
             "longitude": lon,
 
-            "daily": [
+            "daily": ",".join([
                 "temperature_2m_max",
                 "temperature_2m_min",
                 "apparent_temperature_max",
                 "precipitation_sum",
                 "wind_speed_10m_max"
-            ],
+            ]),
 
-            "hourly": [
+            "hourly": ","([
                 "temperature_2m",
                 "relative_humidity_2m",
                 "apparent_temperature"
-            ],
+            ]),
 
             "forecast_days":
                 min(
