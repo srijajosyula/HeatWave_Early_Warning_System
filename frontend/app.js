@@ -210,8 +210,8 @@ async function searchLocation() {
         /* Reload location-based data */
 
         await Promise.all([
-           loadWeather()
-           loadTemperatureForecast()
+           loadWeather(),
+           loadTemperatureForecast(),
            loadAlerts()
        ]);
 
