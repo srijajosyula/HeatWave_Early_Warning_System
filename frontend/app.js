@@ -1009,54 +1009,46 @@ async function loadMLPrediction(
    24-HOUR TEMPERATURE FORECAST
 ===================================================== */
 
+/* =====================================================
+   24-HOUR TEMPERATURE FORECAST
+===================================================== */
+
 async function loadTemperatureForecast() {
 
     const status =
-        document.getElementById(
-            "forecastStatus"
-        );
-
+        document.getElementById("forecastStatus");
 
     try {
 
         if (status) {
-
             status.textContent =
                 "Loading forecast...";
         }
 
-
         const response =
             await fetch(
-                `${API_BASE}/api/weather/forecast?lat=${LATITUDE}&lon=${LONGITUDE}&days=2`
+                `${API_BASE}/api/weather/forecast?lat=${LATITUDE}&lon=${LONGITUDE}&days=2&t=${Date.now()}`
             );
 
-
         if (!response.ok) {
-
             throw new Error(
                 "Forecast API unavailable"
             );
         }
 
-
         const data =
             await response.json();
-
 
         console.log(
             "Forecast API response:",
             data
         );
 
-
         const hourly =
             data.hourly || {};
 
-
         const times =
             hourly.time || [];
-
 
         const temperatures =
             hourly.temperature_2m || [];
@@ -1066,22 +1058,89 @@ async function loadTemperatureForecast() {
             times.length === 0 ||
             temperatures.length === 0
         ) {
-
             throw new Error(
                 "No hourly forecast data available"
             );
         }
 
 
-        /* Take the next 24 hours */
+        /* ---------------------------------------------
+           Convert temperature values to numbers
+        --------------------------------------------- */
+
+        const numericTemperatures =
+            temperatures.map(
+                value => Number(value)
+            );
+
+
+        /* ---------------------------------------------
+           Use the next 24 hours
+        --------------------------------------------- */
+
+        const now =
+            new Date();
+
+        let startIndex = 0;
+
+
+        for (
+            let i = 0;
+            i < times.length;
+            i++
+        ) {
+
+            const forecastTime =
+                new Date(times[i]);
+
+            if (
+                forecastTime >= now
+            ) {
+
+                startIndex = i;
+
+                break;
+            }
+        }
+
 
         const forecastTimes =
-            times.slice(0, 24);
+            times.slice(
+                startIndex,
+                startIndex + 24
+            );
 
 
         const forecastTemperatures =
-            temperatures.slice(0, 24);
+            numericTemperatures.slice(
+                startIndex,
+                startIndex + 24
+            );
 
+
+        console.log(
+            "Next 24 forecast times:",
+            forecastTimes
+        );
+
+        console.log(
+            "Next 24 forecast temperatures:",
+            forecastTemperatures
+        );
+
+
+        if (
+            forecastTemperatures.length === 0
+        ) {
+            throw new Error(
+                "No upcoming forecast temperatures found"
+            );
+        }
+
+
+        /* ---------------------------------------------
+           Draw chart
+        --------------------------------------------- */
 
         drawTemperatureChart(
             forecastTimes,
@@ -1103,7 +1162,6 @@ async function loadTemperatureForecast() {
             error
         );
 
-
         if (status) {
 
             status.textContent =
@@ -1111,7 +1169,6 @@ async function loadTemperatureForecast() {
         }
     }
 }
-
 
 /* =====================================================
    DRAW TEMPERATURE CHART
