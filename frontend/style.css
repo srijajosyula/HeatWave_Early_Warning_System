@@ -935,3 +935,35 @@ canvas {
     }
 
 }
+/* =====================================================
+   MORTALITY RISK INDICATOR
+===================================================== */
+
+.mortality-risk {
+    border-top: 5px solid #dc2626;
+}
+
+.mortality-risk .ml-risk-meter {
+    width: 100%;
+    height: 16px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 18px;
+}
+
+#mortalityRiskMeterFill {
+    width: 0%;
+    height: 100%;
+    background: #16a34a;
+    border-radius: 10px;
+    transition: width 0.5s ease, background 0.5s ease;
+}
+
+.mortality-risk .ml-risk-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 7px;
+    font-size: 12px;
+    color: #64748b;
+}
