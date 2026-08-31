@@ -300,7 +300,7 @@ class WeatherService:
 
                 if attempt < 2:
                     await asyncio.sleep(
-                        1 * (attempt + 1)
+                        10 * (attempt + 1)
                     )
                     continue
 
