@@ -181,7 +181,6 @@ class WeatherService:
             "thermal_stress":
                 thermal_metrics
         }
-
     # =====================================================
     # WEATHER FORECAST
     # =====================================================
