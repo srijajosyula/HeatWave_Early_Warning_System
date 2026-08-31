@@ -33,154 +33,183 @@ class WeatherService:
     # =====================================================
 
     async def get_current_weather(
-    self,
-    lat: float,
-    lon: float
-) -> Dict[str, Any]:
+        self,
+        lat: float,
+        lon: float
+    ) -> Dict[str, Any]:
 
-    params = {
-        "latitude": lat,
-        "longitude": lon,
-        "current": (
-            "temperature_2m,"
-            "relative_humidity_2m,"
-            "apparent_temperature,"
-            "wind_speed_10m,"
-            "surface_pressure,"
-            "precipitation,"
-            "weather_code"
-        ),
-        "timezone": "auto"
-    }
-
-    try:
-
-        async with httpx.AsyncClient(timeout=15.0) as client:
-
-            response = await client.get(
-                self.base_url,
-                params=params
-            )
-
-            response.raise_for_status()
-
-            data = response.json()
-
-        current = data.get("current", {})
-
-        temp = current.get("temperature_2m")
-        humidity = current.get("relative_humidity_2m")
-
-        if temp is None or humidity is None:
-            raise Exception("Open-Meteo returned incomplete weather data")
-
-        thermal_metrics = (
-            ThermalStressService
-            .get_thermal_stress_summary(
-                temp,
-                humidity
-            )
-        )
-
-        return {
+        params = {
             "latitude": lat,
             "longitude": lon,
-            "timezone": data.get("timezone", "UTC"),
-            "time": current.get("time"),
-
-            "temperature_c": temp,
-            "relative_humidity": humidity,
-
-            "apparent_temperature_c":
-                current.get(
-                    "apparent_temperature",
-                    temp
-                ),
-
-            "wind_speed_kmh":
-                current.get(
-                    "wind_speed_10m",
-                    0.0
-                ),
-
-            "surface_pressure_hpa":
-                current.get(
-                    "surface_pressure",
-                    1013.25
-                ),
-
-            "precipitation_mm":
-                current.get(
-                    "precipitation",
-                    0.0
-                ),
-
-            "weather_code":
-                current.get(
-                    "weather_code",
-                    0
-                ),
-
-            "thermal_stress":
-                thermal_metrics,
-
-            "status": "success"
+            "current": (
+                "temperature_2m,"
+                "relative_humidity_2m,"
+                "apparent_temperature,"
+                "wind_speed_10m,"
+                "surface_pressure,"
+                "precipitation,"
+                "weather_code"
+            ),
+            "timezone": "auto"
         }
 
-    except Exception as e:
+        try:
 
-        print(
-            f"Weather API error for "
-            f"{lat}, {lon}: {e}"
-        )
+            async with httpx.AsyncClient(
+                timeout=15.0
+            ) as client:
 
-        # Safe fallback so dashboard still works
-        temp_fallback = 35.0
-        rh_fallback = 50.0
+                response = await client.get(
+                    self.base_url,
+                    params=params
+                )
 
-        thermal_metrics = (
-            ThermalStressService
-            .get_thermal_stress_summary(
-                temp_fallback,
-                rh_fallback
+                response.raise_for_status()
+
+                data = response.json()
+
+            current = data.get(
+                "current",
+                {}
             )
-        )
 
-        return {
+            temp = current.get(
+                "temperature_2m"
+            )
 
-            "latitude": lat,
-            "longitude": lon,
+            humidity = current.get(
+                "relative_humidity_2m"
+            )
 
-            "timezone": "UTC",
+            if temp is None or humidity is None:
+                raise Exception(
+                    "Open-Meteo returned incomplete weather data"
+                )
 
-            "status": "fallback_offline_data",
+            thermal_metrics = (
+                ThermalStressService
+                .get_thermal_stress_summary(
+                    temp,
+                    humidity
+                )
+            )
 
-            "error": str(e),
+            return {
+                "latitude": lat,
 
-            "temperature_c":
-                temp_fallback,
+                "longitude": lon,
 
-            "relative_humidity":
-                rh_fallback,
+                "timezone":
+                    data.get(
+                        "timezone",
+                        "UTC"
+                    ),
 
-            "apparent_temperature_c":
-                temp_fallback + 2.0,
+                "time":
+                    current.get(
+                        "time"
+                    ),
 
-            "wind_speed_kmh":
-                12.0,
+                "temperature_c":
+                    temp,
 
-            "surface_pressure_hpa":
-                1010.0,
+                "relative_humidity":
+                    humidity,
 
-            "precipitation_mm":
-                0.0,
+                "apparent_temperature_c":
+                    current.get(
+                        "apparent_temperature",
+                        temp
+                    ),
 
-            "weather_code":
-                0,
+                "wind_speed_kmh":
+                    current.get(
+                        "wind_speed_10m",
+                        0.0
+                    ),
 
-            "thermal_stress":
-                thermal_metrics
-        }
+                "surface_pressure_hpa":
+                    current.get(
+                        "surface_pressure",
+                        1013.25
+                    ),
+
+                "precipitation_mm":
+                    current.get(
+                        "precipitation",
+                        0.0
+                    ),
+
+                "weather_code":
+                    current.get(
+                        "weather_code",
+                        0
+                    ),
+
+                "thermal_stress":
+                    thermal_metrics,
+
+                "status":
+                    "success"
+            }
+
+        except Exception as e:
+
+            print(
+                f"Weather API error for "
+                f"{lat}, {lon}: {e}"
+            )
+
+            # Safe fallback so dashboard still works
+            temp_fallback = 35.0
+            rh_fallback = 50.0
+
+            thermal_metrics = (
+                ThermalStressService
+                .get_thermal_stress_summary(
+                    temp_fallback,
+                    rh_fallback
+                )
+            )
+
+            return {
+                "latitude": lat,
+
+                "longitude": lon,
+
+                "timezone": "UTC",
+
+                "status":
+                    "fallback_offline_data",
+
+                "error":
+                    str(e),
+
+                "temperature_c":
+                    temp_fallback,
+
+                "relative_humidity":
+                    rh_fallback,
+
+                "apparent_temperature_c":
+                    temp_fallback + 2.0,
+
+                "wind_speed_kmh":
+                    12.0,
+
+                "surface_pressure_hpa":
+                    1010.0,
+
+                "precipitation_mm":
+                    0.0,
+
+                "weather_code":
+                    0,
+
+                "thermal_stress":
+                    thermal_metrics
+            }
+
     # =====================================================
     # WEATHER FORECAST
     # =====================================================
@@ -206,7 +235,7 @@ class WeatherService:
                 "wind_speed_10m_max"
             ]),
 
-            "hourly": ","([
+            "hourly": ",".join([
                 "temperature_2m",
                 "relative_humidity_2m",
                 "apparent_temperature"
@@ -250,7 +279,9 @@ class WeatherService:
                             )
                             continue
 
-                        raise Exception(last_error)
+                        raise Exception(
+                            last_error
+                        )
 
                     response.raise_for_status()
 
@@ -316,7 +347,7 @@ class WeatherService:
             "timezone": "UTC",
 
             "status":
-                "foracast_unavailable",
+                "forecast_unavailable",
 
             "error":
                 last_error or
