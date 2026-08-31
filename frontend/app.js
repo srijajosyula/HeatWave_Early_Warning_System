@@ -1,8 +1,8 @@
-const API_BASE = "https://heatwave-early-warning-system.onrender.com";;
+const API_BASE = "https://heatwave-early-warning-system.onrender.com";
 
 let LATITUDE = 16.5062;
 let LONGITUDE = 80.6480;
-let CURRENT_LOCATION = "Demo Metropolitan Area";
+let CURRENT_LOCATION = "Vijayawada, India";
 
 
 /* =====================================================
@@ -97,9 +97,6 @@ async function checkModel() {
 
 
 /* =====================================================
-   CURRENT WEATHER
-===================================================== */
-/* =====================================================
    LOCATION SEARCH
 ===================================================== */
 
@@ -136,10 +133,7 @@ async function searchLocation() {
             "Finding location...";
 
 
-        /*
-         * Open-Meteo Geocoding API
-         * Converts city name → latitude/longitude
-         */
+        /* Open-Meteo Geocoding API */
 
         const response =
             await fetch(
@@ -175,9 +169,7 @@ async function searchLocation() {
             data.results[0];
 
 
-        /*
-         * Update coordinates
-         */
+        /* Update coordinates */
 
         LATITUDE =
             Number(location.latitude);
@@ -186,9 +178,7 @@ async function searchLocation() {
             Number(location.longitude);
 
 
-        /*
-         * Build readable location name
-         */
+        /* Build readable location name */
 
         CURRENT_LOCATION =
             location.name +
@@ -199,9 +189,7 @@ async function searchLocation() {
             );
 
 
-        /*
-         * Update dashboard location
-         */
+        /* Update dashboard location */
 
         const locationElement =
             document.getElementById(
@@ -219,9 +207,7 @@ async function searchLocation() {
             `Location selected: ${CURRENT_LOCATION}`;
 
 
-        /*
-         * Reload all location-based data
-         */
+        /* Reload location-based data */
 
         await loadWeather();
 
@@ -248,6 +234,10 @@ async function searchLocation() {
             "🔍 Search";
     }
 }
+
+
+/* ENTER KEY FOR LOCATION SEARCH */
+
 document
     .getElementById("locationInput")
     ?.addEventListener(
@@ -260,6 +250,11 @@ document
             }
         }
     );
+
+
+/* =====================================================
+   CURRENT WEATHER
+===================================================== */
 
 async function loadWeather() {
 
@@ -275,16 +270,33 @@ async function loadWeather() {
 
         const data = await response.json();
 
-        console.log("Weather API response:", data);
-        const lastUpdated = document.getElementById("lastUpdated");
+        console.log(
+            "Weather API response:",
+            data
+        );
+
+
+        /* LAST UPDATED */
+
+        const lastUpdated =
+            document.getElementById(
+                "lastUpdated"
+            );
+
         if (lastUpdated) {
-            lastUpdated.textContent = new Date().toLocaleString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-            });
+
+            lastUpdated.textContent =
+                new Date().toLocaleString(
+                    "en-IN",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true
+                    }
+                );
         }
+
 
         const stress =
             data.thermal_stress || {};
@@ -292,26 +304,36 @@ async function loadWeather() {
 
         /* BASIC WEATHER */
 
-        document.getElementById("temperature").textContent =
+        document.getElementById(
+            "temperature"
+        ).textContent =
             data.temperature_c ?? "--";
 
-        document.getElementById("humidity").textContent =
+        document.getElementById(
+            "humidity"
+        ).textContent =
             data.relative_humidity ?? "--";
 
 
         /* THERMAL STRESS */
 
-        document.getElementById("heatIndex").textContent =
+        document.getElementById(
+            "heatIndex"
+        ).textContent =
             stress.heat_index_c ??
             data.heat_index_c ??
             "--";
 
-        document.getElementById("wetBulb").textContent =
+        document.getElementById(
+            "wetBulb"
+        ).textContent =
             stress.wet_bulb_temperature_c ??
             data.wet_bulb_temperature_c ??
             "--";
 
-        document.getElementById("wbgt").textContent =
+        document.getElementById(
+            "wbgt"
+        ).textContent =
             stress.wbgt_c ??
             data.wbgt_c ??
             "--";
@@ -332,13 +354,19 @@ async function loadWeather() {
             data.thermal_category;
 
 
-        document.getElementById("riskScore").textContent =
+        document.getElementById(
+            "riskScore"
+        ).textContent =
             riskScore ?? "--";
 
-        document.getElementById("riskLevel").textContent =
+        document.getElementById(
+            "riskLevel"
+        ).textContent =
             riskLevel ?? "--";
 
-        document.getElementById("riskCategory").textContent =
+        document.getElementById(
+            "riskCategory"
+        ).textContent =
             riskCategory ?? "--";
 
 
@@ -347,7 +375,9 @@ async function loadWeather() {
         ================================================= */
 
         const riskMeterFill =
-            document.getElementById("riskMeterFill");
+            document.getElementById(
+                "riskMeterFill"
+            );
 
         if (
             riskMeterFill &&
@@ -364,23 +394,34 @@ async function loadWeather() {
                     )
                 );
 
+
             riskMeterFill.style.width =
                 `${score}%`;
 
-            const level =
-                String(riskLevel || "").toLowerCase();
 
-            if (level.includes("extreme")) {
+            const level =
+                String(
+                    riskLevel || ""
+                ).toLowerCase();
+
+
+            if (
+                level.includes("extreme")
+            ) {
 
                 riskMeterFill.style.background =
                     "#dc2626";
 
-            } else if (level.includes("high")) {
+            } else if (
+                level.includes("high")
+            ) {
 
                 riskMeterFill.style.background =
                     "#ea580c";
 
-            } else if (level.includes("moderate")) {
+            } else if (
+                level.includes("moderate")
+            ) {
 
                 riskMeterFill.style.background =
                     "#f59e0b";
@@ -398,7 +439,9 @@ async function loadWeather() {
         ================================================= */
 
         const riskCard =
-            document.querySelector(".heat-risk");
+            document.querySelector(
+                ".heat-risk"
+            );
 
         if (riskCard) {
 
@@ -409,24 +452,32 @@ async function loadWeather() {
                 "risk-extreme"
             );
 
+
             const level =
                 String(
                     riskLevel || ""
                 ).toLowerCase();
 
-            if (level.includes("extreme")) {
+
+            if (
+                level.includes("extreme")
+            ) {
 
                 riskCard.classList.add(
                     "risk-extreme"
                 );
 
-            } else if (level.includes("high")) {
+            } else if (
+                level.includes("high")
+            ) {
 
                 riskCard.classList.add(
                     "risk-high"
                 );
 
-            } else if (level.includes("moderate")) {
+            } else if (
+                level.includes("moderate")
+            ) {
 
                 riskCard.classList.add(
                     "risk-moderate"
@@ -454,10 +505,12 @@ async function loadWeather() {
 
             list.innerHTML = "";
 
+
             const recommendations =
                 stress.recommendations ??
                 data.recommendations ??
                 [];
+
 
             if (
                 Array.isArray(recommendations) &&
@@ -468,7 +521,9 @@ async function loadWeather() {
                     recommendation => {
 
                         const item =
-                            document.createElement("li");
+                            document.createElement(
+                                "li"
+                            );
 
                         item.textContent =
                             recommendation;
@@ -498,17 +553,44 @@ async function loadWeather() {
             error
         );
 
-        document.getElementById("temperature").textContent = "--";
-        document.getElementById("humidity").textContent = "--";
-        document.getElementById("heatIndex").textContent = "--";
-        document.getElementById("wetBulb").textContent = "--";
-        document.getElementById("wbgt").textContent = "--";
-        document.getElementById("riskScore").textContent = "--";
-        document.getElementById("riskLevel").textContent = "--";
-        document.getElementById("riskCategory").textContent = "--";
+
+        document.getElementById(
+            "temperature"
+        ).textContent = "--";
+
+        document.getElementById(
+            "humidity"
+        ).textContent = "--";
+
+        document.getElementById(
+            "heatIndex"
+        ).textContent = "--";
+
+        document.getElementById(
+            "wetBulb"
+        ).textContent = "--";
+
+        document.getElementById(
+            "wbgt"
+        ).textContent = "--";
+
+        document.getElementById(
+            "riskScore"
+        ).textContent = "--";
+
+        document.getElementById(
+            "riskLevel"
+        ).textContent = "--";
+
+        document.getElementById(
+            "riskCategory"
+        ).textContent = "--";
+
 
         const list =
-            document.getElementById("recommendations");
+            document.getElementById(
+                "recommendations"
+            );
 
         if (list) {
 
@@ -523,7 +605,9 @@ async function loadWeather() {
    ML PREDICTION
 ===================================================== */
 
-async function loadMLPrediction(weatherData) {
+async function loadMLPrediction(
+    weatherData
+) {
 
     try {
 
@@ -531,12 +615,22 @@ async function loadMLPrediction(weatherData) {
             weatherData.thermal_stress || {};
 
 
+        /* =================================================
+           ML REQUEST
+        ================================================= */
+
         const mlRequest = {
 
             zone_id: "TEST01",
 
+            /*
+             * IMPORTANT:
+             * Use the currently selected location
+             * instead of "Demo Metropolitan Area".
+             */
+
             zone_name:
-                "Demo Metropolitan Area",
+                CURRENT_LOCATION,
 
             temperature_c:
                 weatherData.temperature_c ?? 0,
@@ -550,13 +644,17 @@ async function loadMLPrediction(weatherData) {
             solar_radiation_wm2:
                 stress.solar_radiation_wm2 ?? 0,
 
-            elderly_density: 0.15,
+            elderly_density:
+                0.15,
 
-            outdoor_worker_density: 0.20,
+            outdoor_worker_density:
+                0.20,
 
-            population_density: 5000,
+            population_density:
+                5000,
 
-            healthcare_access: 0.70,
+            healthcare_access:
+                0.70,
 
             additional_features: {}
         };
@@ -568,25 +666,27 @@ async function loadMLPrediction(weatherData) {
         );
 
 
-        const response = await fetch(
-            `${API_BASE}/api/risk/predict`,
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                `${API_BASE}/api/risk/predict`,
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body:
-                    JSON.stringify(
-                        mlRequest
-                    )
-            }
-        );
+                    body:
+                        JSON.stringify(
+                            mlRequest
+                        )
+                }
+            );
 
 
         if (!response.ok) {
+
             throw new Error(
                 "ML prediction request failed"
             );
@@ -595,6 +695,7 @@ async function loadMLPrediction(weatherData) {
 
         const mlData =
             await response.json();
+
 
         console.log(
             "ML Prediction:",
@@ -620,138 +721,189 @@ async function loadMLPrediction(weatherData) {
                 String(
                     mlResult.risk_level || ""
                 );
-           /* =================================================
-           MORTALITY RISK INDICATOR
-           ================================================= */
-
-const mortalityScore =
-    Math.max(
-        0,
-        Math.min(
-            100,
-            mlScore
-        )
-    );
-
-let mortalityLevel;
-
-if (mortalityScore >= 75) {
-
-    mortalityLevel = "Extreme";
-
-} else if (mortalityScore >= 50) {
-
-    mortalityLevel = "High";
-
-} else if (mortalityScore >= 25) {
-
-    mortalityLevel = "Moderate";
-
-} else {
-
-    mortalityLevel = "Low";
-}
 
 
-/* MORTALITY SCORE */
+            /* =================================================
+               MORTALITY RISK INDICATOR
+            ================================================= */
 
-const mortalityScoreElement =
-    document.getElementById(
-        "mortalityRiskScore"
-    );
-
-if (mortalityScoreElement) {
-
-    mortalityScoreElement.textContent =
-        mortalityScore.toFixed(2);
-}
-
-
-/* MORTALITY LEVEL */
-
-const mortalityLevelElement =
-    document.getElementById(
-        "mortalityRiskLevel"
-    );
-
-if (mortalityLevelElement) {
-
-    mortalityLevelElement.textContent =
-        mortalityLevel;
-}
+            const mortalityScore =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        mlScore
+                    )
+                );
 
 
-/* MORTALITY METER */
-
-const mortalityMeter =
-    document.getElementById(
-        "mortalityRiskMeterFill"
-    );
-
-if (mortalityMeter) {
-
-    mortalityMeter.style.width =
-        `${mortalityScore}%`;
-
-    if (mortalityLevel === "Extreme") {
-
-        mortalityMeter.style.background =
-            "#dc2626";
-
-    } else if (mortalityLevel === "High") {
-
-        mortalityMeter.style.background =
-            "#ea580c";
-
-    } else if (mortalityLevel === "Moderate") {
-
-        mortalityMeter.style.background =
-            "#f59e0b";
-
-    } else {
-
-        mortalityMeter.style.background =
-            "#16a34a";
-    }
-}
+            let mortalityLevel;
 
 
-            /* ML SCORE */
+            if (
+                mortalityScore >= 75
+            ) {
+
+                mortalityLevel =
+                    "Extreme";
+
+            } else if (
+                mortalityScore >= 50
+            ) {
+
+                mortalityLevel =
+                    "High";
+
+            } else if (
+                mortalityScore >= 25
+            ) {
+
+                mortalityLevel =
+                    "Moderate";
+
+            } else {
+
+                mortalityLevel =
+                    "Low";
+            }
+
+
+            /* =================================================
+               MORTALITY SCORE
+            ================================================= */
+
+            const mortalityScoreElement =
+                document.getElementById(
+                    "mortalityRiskScore"
+                );
+
+
+            if (
+                mortalityScoreElement
+            ) {
+
+                mortalityScoreElement.textContent =
+                    mortalityScore.toFixed(2);
+            }
+
+
+            /* =================================================
+               MORTALITY LEVEL
+            ================================================= */
+
+            const mortalityLevelElement =
+                document.getElementById(
+                    "mortalityRiskLevel"
+                );
+
+
+            if (
+                mortalityLevelElement
+            ) {
+
+                mortalityLevelElement.textContent =
+                    mortalityLevel;
+            }
+
+
+            /* =================================================
+               MORTALITY METER
+            ================================================= */
+
+            const mortalityMeter =
+                document.getElementById(
+                    "mortalityRiskMeterFill"
+                );
+
+
+            if (
+                mortalityMeter
+            ) {
+
+                mortalityMeter.style.width =
+                    `${mortalityScore}%`;
+
+
+                if (
+                    mortalityLevel === "Extreme"
+                ) {
+
+                    mortalityMeter.style.background =
+                        "#dc2626";
+
+                } else if (
+                    mortalityLevel === "High"
+                ) {
+
+                    mortalityMeter.style.background =
+                        "#ea580c";
+
+                } else if (
+                    mortalityLevel === "Moderate"
+                ) {
+
+                    mortalityMeter.style.background =
+                        "#f59e0b";
+
+                } else {
+
+                    mortalityMeter.style.background =
+                        "#16a34a";
+                }
+            }
+
+
+            /* =================================================
+               ML SCORE
+            ================================================= */
 
             const scoreElement =
                 document.getElementById(
                     "mlRiskScore"
                 );
 
-            if (scoreElement) {
+
+            if (
+                scoreElement
+            ) {
 
                 scoreElement.textContent =
                     mlScore.toFixed(2);
             }
 
 
-            /* ML LEVEL */
+            /* =================================================
+               ML LEVEL
+            ================================================= */
 
             const levelElement =
                 document.getElementById(
                     "mlRiskLevel"
                 );
 
-            if (levelElement) {
+
+            if (
+                levelElement
+            ) {
 
                 levelElement.textContent =
                     mlLevel;
             }
 
 
-            /* ML METER */
+            /* =================================================
+               ML METER
+            ================================================= */
 
             const meter =
                 document.getElementById(
                     "mlRiskMeterFill"
                 );
 
-            if (meter) {
+
+            if (
+                meter
+            ) {
 
                 const score =
                     Math.max(
@@ -761,6 +913,7 @@ if (mortalityMeter) {
                             mlScore
                         )
                     );
+
 
                 meter.style.width =
                     `${score}%`;
@@ -798,6 +951,7 @@ if (mortalityMeter) {
                 }
             }
 
+
         } else {
 
             console.error(
@@ -806,6 +960,7 @@ if (mortalityMeter) {
             );
         }
 
+
     } catch (error) {
 
         console.error(
@@ -813,21 +968,32 @@ if (mortalityMeter) {
             error
         );
 
+
         const scoreElement =
             document.getElementById(
                 "mlRiskScore"
             );
 
-        if (scoreElement) {
-            scoreElement.textContent = "--";
+
+        if (
+            scoreElement
+        ) {
+
+            scoreElement.textContent =
+                "--";
         }
+
 
         const levelElement =
             document.getElementById(
                 "mlRiskLevel"
             );
 
-        if (levelElement) {
+
+        if (
+            levelElement
+        ) {
+
             levelElement.textContent =
                 "Unavailable";
         }
@@ -846,17 +1012,20 @@ async function loadTemperatureForecast() {
             "forecastStatus"
         );
 
+
     try {
 
         if (status) {
+
             status.textContent =
                 "Loading forecast...";
         }
 
 
-        const response = await fetch(
-            `${API_BASE}/api/weather/forecast?lat=${LATITUDE}&lon=${LONGITUDE}&days=2`
-        );
+        const response =
+            await fetch(
+                `${API_BASE}/api/weather/forecast?lat=${LATITUDE}&lon=${LONGITUDE}&days=2`
+            );
 
 
         if (!response.ok) {
@@ -880,8 +1049,10 @@ async function loadTemperatureForecast() {
         const hourly =
             data.hourly || {};
 
+
         const times =
             hourly.time || [];
+
 
         const temperatures =
             hourly.temperature_2m || [];
@@ -898,12 +1069,11 @@ async function loadTemperatureForecast() {
         }
 
 
-        /*
-         * Take the next 24 hours.
-         */
+        /* Take the next 24 hours */
 
         const forecastTimes =
             times.slice(0, 24);
+
 
         const forecastTemperatures =
             temperatures.slice(0, 24);
@@ -921,12 +1091,14 @@ async function loadTemperatureForecast() {
                 "Showing temperature forecast for the next 24 hours.";
         }
 
+
     } catch (error) {
 
         console.error(
             "Forecast error:",
             error
         );
+
 
         if (status) {
 
@@ -951,6 +1123,7 @@ function drawTemperatureChart(
             "temperatureChart"
         );
 
+
     if (!canvas) {
         return;
     }
@@ -963,7 +1136,9 @@ function drawTemperatureChart(
     const width =
         container.clientWidth || 700;
 
-    const height = 320;
+
+    const height =
+        320;
 
 
     const dpr =
@@ -973,11 +1148,14 @@ function drawTemperatureChart(
     canvas.width =
         width * dpr;
 
+
     canvas.height =
         height * dpr;
 
+
     canvas.style.width =
         `${width}px`;
+
 
     canvas.style.height =
         `${height}px`;
@@ -1008,6 +1186,7 @@ function drawTemperatureChart(
         paddingLeft -
         paddingRight;
 
+
     const chartHeight =
         height -
         paddingTop -
@@ -1030,6 +1209,7 @@ function drawTemperatureChart(
                 ...numericTemps
             ) - 2
         );
+
 
     let maxTemp =
         Math.ceil(
@@ -1067,13 +1247,17 @@ function drawTemperatureChart(
     ctx.font =
         "12px Arial";
 
+
     ctx.textAlign =
         "right";
+
 
     ctx.textBaseline =
         "middle";
 
-    const gridLines = 5;
+
+    const gridLines =
+        5;
 
 
     for (
@@ -1085,10 +1269,8 @@ function drawTemperatureChart(
         const value =
             minTemp +
             (
-                (maxTemp - minTemp)
-                *
-                i
-                /
+                (maxTemp - minTemp) *
+                i /
                 gridLines
             );
 
@@ -1106,26 +1288,33 @@ function drawTemperatureChart(
         ctx.strokeStyle =
             "#e2e8f0";
 
-        ctx.lineWidth = 1;
+
+        ctx.lineWidth =
+            1;
+
 
         ctx.beginPath();
+
 
         ctx.moveTo(
             paddingLeft,
             y
         );
 
+
         ctx.lineTo(
             width -
-                paddingRight,
+            paddingRight,
             y
         );
+
 
         ctx.stroke();
 
 
         ctx.fillStyle =
             "#64748b";
+
 
         ctx.fillText(
             `${value.toFixed(0)}°`,
@@ -1143,7 +1332,10 @@ function drawTemperatureChart(
 
 
     numericTemps.forEach(
-        (temperature, index) => {
+        (
+            temperature,
+            index
+        ) => {
 
             const x =
                 paddingLeft +
@@ -1192,9 +1384,14 @@ function drawTemperatureChart(
 
 
     points.forEach(
-        (point, index) => {
+        (
+            point,
+            index
+        ) => {
 
-            if (index === 0) {
+            if (
+                index === 0
+            ) {
 
                 ctx.moveTo(
                     point.x,
@@ -1215,13 +1412,18 @@ function drawTemperatureChart(
     ctx.strokeStyle =
         "#2563eb";
 
-    ctx.lineWidth = 3;
+
+    ctx.lineWidth =
+        3;
+
 
     ctx.lineJoin =
         "round";
 
+
     ctx.lineCap =
         "round";
+
 
     ctx.stroke();
 
@@ -1235,6 +1437,7 @@ function drawTemperatureChart(
 
             ctx.beginPath();
 
+
             ctx.arc(
                 point.x,
                 point.y,
@@ -1243,8 +1446,10 @@ function drawTemperatureChart(
                 Math.PI * 2
             );
 
+
             ctx.fillStyle =
                 "#2563eb";
+
 
             ctx.fill();
         }
@@ -1258,28 +1463,35 @@ function drawTemperatureChart(
     ctx.fillStyle =
         "#64748b";
 
+
     ctx.font =
         "11px Arial";
 
+
     ctx.textAlign =
         "center";
+
 
     ctx.textBaseline =
         "top";
 
 
     points.forEach(
-        (point, index) => {
+        (
+            point,
+            index
+        ) => {
 
             /*
              * Show approximately every
-             * 4 hours to keep the graph clean.
+             * 4 hours.
              */
 
             if (
                 index % 4 !== 0 &&
                 index !== points.length - 1
             ) {
+
                 return;
             }
 
@@ -1305,8 +1517,8 @@ function drawTemperatureChart(
                 label,
                 point.x,
                 height -
-                    paddingBottom +
-                    12
+                paddingBottom +
+                12
             );
         }
     );
@@ -1440,12 +1652,14 @@ async function loadAlerts() {
             }
         );
 
+
     } catch (error) {
 
         console.error(
             "Alerts error:",
             error
         );
+
 
         document.getElementById(
             "alerts"
