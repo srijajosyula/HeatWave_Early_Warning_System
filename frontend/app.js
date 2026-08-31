@@ -209,11 +209,11 @@ async function searchLocation() {
 
         /* Reload location-based data */
 
-        await loadWeather();
-
-        await loadTemperatureForecast();
-
-        await loadAlerts();
+        await Promise.all([
+           loadWeather()
+           loadTemperatureForecast()
+           loadAlerts()
+       ]);
 
 
     } catch (error) {
