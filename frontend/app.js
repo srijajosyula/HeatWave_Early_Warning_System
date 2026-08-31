@@ -620,6 +620,100 @@ async function loadMLPrediction(weatherData) {
                 String(
                     mlResult.risk_level || ""
                 );
+           /* =================================================
+           MORTALITY RISK INDICATOR
+           ================================================= */
+
+const mortalityScore =
+    Math.max(
+        0,
+        Math.min(
+            100,
+            mlScore
+        )
+    );
+
+let mortalityLevel;
+
+if (mortalityScore >= 75) {
+
+    mortalityLevel = "Extreme";
+
+} else if (mortalityScore >= 50) {
+
+    mortalityLevel = "High";
+
+} else if (mortalityScore >= 25) {
+
+    mortalityLevel = "Moderate";
+
+} else {
+
+    mortalityLevel = "Low";
+}
+
+
+/* MORTALITY SCORE */
+
+const mortalityScoreElement =
+    document.getElementById(
+        "mortalityRiskScore"
+    );
+
+if (mortalityScoreElement) {
+
+    mortalityScoreElement.textContent =
+        mortalityScore.toFixed(2);
+}
+
+
+/* MORTALITY LEVEL */
+
+const mortalityLevelElement =
+    document.getElementById(
+        "mortalityRiskLevel"
+    );
+
+if (mortalityLevelElement) {
+
+    mortalityLevelElement.textContent =
+        mortalityLevel;
+}
+
+
+/* MORTALITY METER */
+
+const mortalityMeter =
+    document.getElementById(
+        "mortalityRiskMeterFill"
+    );
+
+if (mortalityMeter) {
+
+    mortalityMeter.style.width =
+        `${mortalityScore}%`;
+
+    if (mortalityLevel === "Extreme") {
+
+        mortalityMeter.style.background =
+            "#dc2626";
+
+    } else if (mortalityLevel === "High") {
+
+        mortalityMeter.style.background =
+            "#ea580c";
+
+    } else if (mortalityLevel === "Moderate") {
+
+        mortalityMeter.style.background =
+            "#f59e0b";
+
+    } else {
+
+        mortalityMeter.style.background =
+            "#16a34a";
+    }
+}
 
 
             /* ML SCORE */
