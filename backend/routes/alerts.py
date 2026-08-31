@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from datetime import datetime,timezone,timedelta
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from ..services.alert_service import AlertService
@@ -39,6 +40,11 @@ async def get_active_alerts():
     """
     Returns active heatwave warnings across monitored zones.
     """
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(hours=8)
+
+    effective_from = now.isoformat().replace("+00:00", "Z")
+    expires_at = expires.isoformat().replace("+00:00", "Z")
     # Sample active alerts for demo/hackathon display
     return {
         "count": 1,
@@ -49,8 +55,8 @@ async def get_active_alerts():
                 "alert_level": "ORANGE",
                 "severity": "HIGH",
                 "color_code": "#F97316",
-                "effective_from": "2026-08-29T10:00:00Z",
-                "expires_at": "2026-08-29T18:00:00Z",
+                "effective_from": effective_from,
+                "expires_at": expires_at,
                 "message": "Heatwave Warning: Temperatures expected to exceed 42°C with high thermal stress."
             }
         ]
