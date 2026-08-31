@@ -41,7 +41,7 @@ async def get_active_alerts():
     Returns active heatwave warnings across monitored zones.
     """
     now = datetime.now(timezone.utc)
-    expires = now + timedelta(hours=8)
+    expires = now + timedelta(hours=24)
 
     effective_from = now.isoformat().replace("+00:00", "Z")
     expires_at = expires.isoformat().replace("+00:00", "Z")
