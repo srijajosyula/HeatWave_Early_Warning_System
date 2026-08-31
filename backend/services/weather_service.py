@@ -1,4 +1,5 @@
 import os
+import asyncio
 from typing import Dict, Any
 
 try:
@@ -54,149 +55,185 @@ class WeatherService:
             "timezone": "auto"
         }
 
-        try:
+        last_error = None
 
-            async with httpx.AsyncClient(timeout=10.0) as client:
+        # Retry up to 3 times
+        for attempt in range(3):
 
-                response = await client.get(
-                    self.base_url,
-                    params=params
+            try:
+
+                async with httpx.AsyncClient(
+                    timeout=15.0
+                ) as client:
+
+                    response = await client.get(
+                        self.base_url,
+                        params=params
+                    )
+
+                    # Handle rate limiting
+                    if response.status_code == 429:
+
+                        last_error = (
+                            "Open-Meteo rate limit reached"
+                        )
+
+                        if attempt < 2:
+                            await asyncio.sleep(
+                                2 * (attempt + 1)
+                            )
+                            continue
+
+                        raise Exception(last_error)
+
+                    response.raise_for_status()
+
+                    data = response.json()
+
+                current = data.get(
+                    "current",
+                    {}
                 )
 
-                response.raise_for_status()
-
-                data = response.json()
-
-            current = data.get("current", {})
-
-            temp = current.get(
-                "temperature_2m",
-                0.0
-            )
-
-            humidity = current.get(
-                "relative_humidity_2m",
-                0.0
-            )
-
-            # Calculate thermal stress
-            thermal_metrics = (
-                ThermalStressService
-                .get_thermal_stress_summary(
-                    temp,
-                    humidity
+                temp = current.get(
+                    "temperature_2m"
                 )
-            )
 
-            return {
-
-                "latitude": lat,
-
-                "longitude": lon,
-
-                "timezone":
-                    data.get(
-                        "timezone",
-                        "UTC"
-                    ),
-
-                "time":
-                    current.get("time"),
-
-                "temperature_c":
-                    temp,
-
-                "relative_humidity":
-                    humidity,
-
-                "apparent_temperature_c":
-                    current.get(
-                        "apparent_temperature",
-                        temp
-                    ),
-
-                "wind_speed_kmh":
-                    current.get(
-                        "wind_speed_10m",
-                        0.0
-                    ),
-
-                "surface_pressure_hpa":
-                    current.get(
-                        "surface_pressure",
-                        1013.25
-                    ),
-
-                "precipitation_mm":
-                    current.get(
-                        "precipitation",
-                        0.0
-                    ),
-
-                "weather_code":
-                    current.get(
-                        "weather_code",
-                        0
-                    ),
-
-                "thermal_stress":
-                    thermal_metrics
-            }
-
-        except Exception as e:
-
-            # Offline fallback
-
-            temp_fallback = 35.0
-
-            rh_fallback = 50.0
-
-            thermal_metrics = (
-                ThermalStressService
-                .get_thermal_stress_summary(
-                    temp_fallback,
-                    rh_fallback
+                humidity = current.get(
+                    "relative_humidity_2m"
                 )
-            )
 
-            return {
+                # Make sure actual weather values exist
+                if temp is None or humidity is None:
+                    raise Exception(
+                        "Current weather data unavailable"
+                    )
 
-                "latitude": lat,
+                # Calculate thermal stress
+                thermal_metrics = (
+                    ThermalStressService
+                    .get_thermal_stress_summary(
+                        temp,
+                        humidity
+                    )
+                )
 
-                "longitude": lon,
+                return {
 
-                "timezone": "UTC",
+                    "latitude": lat,
 
-                "status":
-                    "fallback_offline_data",
+                    "longitude": lon,
 
-                "error":
-                    str(e),
+                    "timezone":
+                        data.get(
+                            "timezone",
+                            "UTC"
+                        ),
 
-                "temperature_c":
-                    temp_fallback,
+                    "time":
+                        current.get(
+                            "time"
+                        ),
 
-                "relative_humidity":
-                    rh_fallback,
+                    "temperature_c":
+                        temp,
 
-                "apparent_temperature_c":
-                    temp_fallback + 2.0,
+                    "relative_humidity":
+                        humidity,
 
-                "wind_speed_kmh":
-                    12.0,
+                    "apparent_temperature_c":
+                        current.get(
+                            "apparent_temperature",
+                            temp
+                        ),
 
-                "surface_pressure_hpa":
-                    1010.0,
+                    "wind_speed_kmh":
+                        current.get(
+                            "wind_speed_10m",
+                            0.0
+                        ),
 
-                "precipitation_mm":
-                    0.0,
+                    "surface_pressure_hpa":
+                        current.get(
+                            "surface_pressure",
+                            1013.25
+                        ),
 
-                "weather_code":
-                    0,
+                    "precipitation_mm":
+                        current.get(
+                            "precipitation",
+                            0.0
+                        ),
 
-                "thermal_stress":
-                    thermal_metrics
-            }
+                    "weather_code":
+                        current.get(
+                            "weather_code",
+                            0
+                        ),
+
+                    "thermal_stress":
+                        thermal_metrics,
+
+                    "status":
+                        "success"
+                }
+
+            except Exception as e:
+
+                last_error = str(e)
+
+                if attempt < 2:
+                    await asyncio.sleep(
+                        1 * (attempt + 1)
+                    )
+                    continue
+
+        # =================================================
+        # FINAL FALLBACK
+        # =================================================
+
+        # IMPORTANT:
+        # Do not pretend that fallback values are real
+        # weather observations.
+
+        return {
+
+            "latitude": lat,
+
+            "longitude": lon,
+
+            "timezone": "UTC",
+
+            "status":
+                "weather_api_unavailable",
+
+            "error":
+                last_error or
+                "Unable to fetch weather data",
+
+            "temperature_c":
+                None,
+
+            "relative_humidity":
+                None,
+
+            "apparent_temperature_c":
+                None,
+
+            "wind_speed_kmh":
+                None,
+
+            "surface_pressure_hpa":
+                None,
+
+            "precipitation_mm":
+                None,
+
+            "weather_code":
+                None,
+
+            "thermal_stress": {}
+        }
 
 
     # =====================================================
@@ -211,7 +248,9 @@ class WeatherService:
     ) -> Dict[str, Any]:
 
         params = {
+
             "latitude": lat,
+
             "longitude": lon,
 
             "daily": [
@@ -228,47 +267,117 @@ class WeatherService:
                 "apparent_temperature"
             ],
 
-            "forecast_days": min(max(days, 1), 14),
+            "forecast_days":
+                min(
+                    max(days, 1),
+                    14
+                ),
+
             "timezone": "auto"
         }
 
-        try:
+        last_error = None
 
-            async with httpx.AsyncClient(timeout=15.0) as client:
+        # Retry up to 3 times
+        for attempt in range(3):
 
-                response = await client.get(
-                    self.base_url,
-                    params=params
+            try:
+
+                async with httpx.AsyncClient(
+                    timeout=20.0
+                ) as client:
+
+                    response = await client.get(
+                        self.base_url,
+                        params=params
+                    )
+
+                    # Handle rate limiting
+                    if response.status_code == 429:
+
+                        last_error = (
+                            "Open-Meteo rate limit reached"
+                        )
+
+                        if attempt < 2:
+                            await asyncio.sleep(
+                                2 * (attempt + 1)
+                            )
+                            continue
+
+                        raise Exception(last_error)
+
+                    response.raise_for_status()
+
+                    data = response.json()
+
+                daily_data = data.get(
+                    "daily",
+                    {}
                 )
 
-                response.raise_for_status()
+                hourly_data = data.get(
+                    "hourly",
+                    {}
+                )
 
-                data = response.json()
+                if not hourly_data:
+                    raise Exception(
+                        "No hourly forecast data available"
+                    )
 
-            daily_data = data.get("daily", {})
-            hourly_data = data.get("hourly", {})
+                return {
 
-            if not hourly_data:
-                raise Exception("No hourly forecast data available")
+                    "latitude": lat,
 
-            return {
-                "latitude": lat,
-                "longitude": lon,
-                "timezone": data.get("timezone", "UTC"),
-                "daily": daily_data,
-                "hourly": hourly_data,
-                "status": "success"
-            }
+                    "longitude": lon,
 
-        except Exception as e:
+                    "timezone":
+                        data.get(
+                            "timezone",
+                            "UTC"
+                        ),
 
-            return {
-                "latitude": lat,
-                "longitude": lon,
-                "timezone": "UTC",
-                "status": "error_fetching_forecast",
-                "error": str(e),
-                "daily": {},
-                "hourly": {}
-            }
+                    "daily":
+                        daily_data,
 
+                    "hourly":
+                        hourly_data,
+
+                    "status":
+                        "success"
+                }
+
+            except Exception as e:
+
+                last_error = str(e)
+
+                if attempt < 2:
+                    await asyncio.sleep(
+                        1 * (attempt + 1)
+                    )
+                    continue
+
+        # =================================================
+        # FORECAST ERROR
+        # =================================================
+
+        return {
+
+            "latitude": lat,
+
+            "longitude": lon,
+
+            "timezone": "UTC",
+
+            "status":
+                "error_fetching_forecast",
+
+            "error":
+                last_error or
+                "Unable to fetch forecast",
+
+            "daily": {},
+
+            "hourly": {}
+        }
